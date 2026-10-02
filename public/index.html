@@ -99,6 +99,11 @@ body{background:var(--bg);color:var(--ink);font-family:var(--f-ui);font-size:var
 .banner.ok{background:color-mix(in srgb,var(--ok) 11%,var(--screen));color:var(--ok);border:1px solid color-mix(in srgb,var(--ok) 40%,transparent)}
 .shim{background:linear-gradient(90deg,var(--wire) 0%,var(--wire2) 50%,var(--wire) 100%);background-size:200% 100%;animation:sh 1.3s linear infinite;border-radius:8px}
 @keyframes sh{to{background-position:-200% 0}}
+/* skeleton: โครงเท่าเนื้อหาจริง เพื่อไม่ให้ layout กระโดดตอนข้อมูลมา */
+.sk{display:block;background:linear-gradient(90deg,var(--wire) 0%,var(--wire2) 50%,var(--wire) 100%);background-size:200% 100%;animation:sh 1.3s linear infinite;border-radius:6px}
+.sk.i{display:inline-block;vertical-align:middle}
+.skc{display:flex;flex-direction:column;gap:7px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 
 /* inbox */
 .ih{padding:6px 18px 4px;flex:0 0 auto}
@@ -259,7 +264,7 @@ const DOC = {
   risk:"เบี้ยปรับล่าช้าต่างจากสัญญามาตรฐาน 5%", sn:"7F3A21C9", name:"สมชาย ใจดี (ตัวอย่าง)",
   pins:[38,40,41], pages:42
 };
-const SCEN_DEFAULT = {face:"ok", outcome:"ok", doc:"normal", verify:"valid"};
+const SCEN_DEFAULT = {face:"ok", outcome:"ok", doc:"normal", verify:"valid", load:"normal"};
 let S, timers=[];
 function reset(){
   timers.forEach(clearTimeout); timers=[];
@@ -293,6 +298,7 @@ const sbar=()=>`<div class="island"></div><div class="sbar"><span id="clock" tit
 const mh=(sub)=>`<div class="mh"><button class="ib" data-a="close" aria-label="ปิดเอกสาร">✕</button><div class="t"><b>${DOC.title}</b><small>${sub||DOC.file}</small></div><button class="ib" data-a="more" aria-label="เพิ่มเติม">⋯</button></div>`;
 const ctx=(cert)=>`<div class="ctx"><div class="sw"></div><div class="who"><b>ในนาม ${DOC.entity}</b>${DOC.role}</div>${cert||`<span class="cert"><span class="dot"></span>Cert OK</span>`}</div>`;
 const seg=()=>`<div class="seg" role="tablist">${["สรุป","เอกสาร","สอบถาม"].map((t,i)=>`<button role="tab" class="${i===S.tab?'on':''}" data-a="tab" data-v="${i}">${t}${i===2&&S.unread?'<span class="bdg"></span>':''}</button>`).join("")}</div>`;
+const chipsRow=()=>`<div class="chips"><span class="chip r">SLA วันนี้ 17:00</span><span class="chip a">Tier 3 · &gt;10M</span><span class="chip">จัดซื้อจัดจ้าง</span><span class="chip ok">Legal ✓ 29 ก.ย.</span></div>`;
 const fourCards=()=>`<div class="g2">
   <div class="card"><span class="l">คู่สัญญา</span><span class="v">${DOC.cp}</span></div>
   <div class="card big"><span class="l">มูลค่าธุรกรรม (THB)</span><span class="v">${DOC.val}</span></div>
@@ -319,9 +325,25 @@ inbox:()=>`${sbar()}<div class="ih"><h1>รอลงนาม</h1><span class="e
  </div>
  <div class="tabbar"><span class="on"><i>▤</i>Inbox</span><span><i>◷</i>ติดตาม</span><span><i>⛨</i>ความปลอดภัย</span></div>`,
 
+skeleton:()=>{
+  const bar=(w,h=14)=>`<span class="sk" style="width:${w};height:${h}px"></span>`;
+  const card=(w1,w2)=>`<div class="card skc" style="gap:8px">${bar("45%",15)}${bar(w1,18)}${bar(w2||"0",18)}</div>`;
+  return `${sbar()}${mh(`<span class="sk i" style="width:62%;height:12px"></span>`)}
+ <div class="ctx" style="border-color:var(--line);background:var(--screen)"><span class="sk" style="width:8px;height:24px;border-radius:2px"></span><div class="who skc" style="gap:7px">${bar("70%",15)}${bar("50%",13)}</div>${bar("56px",12)}</div>
+ <div class="seg">${["สรุป","เอกสาร","สอบถาม"].map((t,i)=>`<button disabled class="${i===0?'on':''}" style="cursor:default">${t}</button>`).join("")}</div>
+ <div class="body" aria-busy="true"><span class="sr">กำลังโหลดเอกสาร</span>
+  <div class="chips">${["108px","104px","92px","116px"].map(w=>`<span class="sk" style="width:${w};height:27px;border-radius:4px"></span>`).join("")}</div>
+  <div class="g2">${card("85%","55%")}${card("75%")}${card("80%","40%")}${card("90%","60%")}</div>
+  <div class="blk">${bar("38%",14)}${["96%","60%","92%","45%","88%","70%"].map(w=>bar(w,17)).join("")}</div>
+  <div class="blk">${bar("46%",12)}<div style="display:flex;gap:8px;align-items:center"><span class="sk" style="width:24px;height:24px;border-radius:50%"></span>${bar("55%")}</div><div style="display:flex;gap:8px;align-items:center"><span class="sk" style="width:24px;height:24px;border-radius:50%"></span>${bar("35%")}</div></div>
+ </div>
+ <div class="abar"><button class="btn ghost danger" disabled>ปฏิเสธ</button><button class="btn ghost" disabled>สอบถาม</button><button class="btn p" disabled>กำลังโหลดเอกสาร…</button></div>`;
+},
+
 loading:()=>`${sbar()}${mh("กำลังโหลด PDF · 18.6/31.4 MB")}${ctx(`<span class="cert"><span class="dot" style="background:var(--warn)"></span>กำลังตรวจ</span>`)}${seg()}
- <div class="body"><div class="banner i">สรุปพร้อมแล้ว อ่านต่อได้ทันที ตัวเอกสารกำลังโหลดอยู่เบื้องหลัง</div>${fourCards()}
- <div class="shim" style="height:96px"></div><div class="shim" style="height:70px"></div></div>
+ <div class="body">${chipsRow()}${fourCards()}
+ <div class="banner i">สรุปพร้อมแล้ว อ่านต่อได้ทันที ตัวเอกสารกำลังโหลดอยู่เบื้องหลัง</div>
+ <div class="shim" style="height:132px"></div><div class="shim" style="height:96px"></div></div>
  <div class="abar"><button class="btn ghost danger" disabled>ปฏิเสธ</button><button class="btn p" disabled>กำลังตรวจความครบถ้วนไฟล์…</button></div>`,
 
 doc:()=>{
@@ -376,7 +398,7 @@ verify:()=>{
 
 function summary(){
   return `<div class="body">
-  <div class="chips"><span class="chip r">SLA วันนี้ 17:00</span><span class="chip a">Tier 3 · &gt;10M</span><span class="chip">จัดซื้อจัดจ้าง</span><span class="chip ok">Legal ✓ 29 ก.ย.</span></div>
+  ${chipsRow()}
   ${blocked()?`<div class="banner w">⚠ ยังลงนามไม่ได้: ไม่พบใบเสนอราคาเปรียบเทียบรายที่ 3 ซึ่งบังคับสำหรับวงเงินเกิน 10 ล้านบาท</div>`:""}
   ${fourCards()}
   ${S.scen.doc==="noai"
@@ -523,8 +545,11 @@ function toast(t,ms=2600){ S.toast=t; render(); later(()=>{S.toast=null; render(
 
 /* ================= interactions ================= */
 function openDoc(){
-  reset(); S.view="loading"; S.tab=0; ev("open_doc"); render();
-  later(()=>{ S.view="doc"; render(); },1300);
+  reset(); S.view="skeleton"; S.tab=0; ev("open_doc"); render();
+  const wait = S.scen.load==="slow" ? 3500 : 900;
+  later(()=>{ if(S.view!=="skeleton") return; S.view="loading"; ev("summary_ready"); render();
+    later(()=>{ if(S.view!=="loading") return; S.view="doc"; ev("doc_ready"); render(); },1100);
+  },wait);
 }
 function jumpPage(n){
   S.tab=1; S.sheet=null; render();
@@ -625,6 +650,7 @@ function renderFac(){
   <fieldset><legend>Face ID</legend>${r("face",[["ok","ผ่านทันที"],["fail1","ไม่ผ่าน 1 ครั้ง แล้วผ่าน"],["lockout","ไม่ผ่าน 3 ครั้ง → PIN"]])}</fieldset>
   <fieldset><legend>ผลการผนึกลายเซ็น</legend>${r("outcome",[["ok","สำเร็จ"],["cert","ใบรับรองถูกเพิกถอน"],["net","เน็ตหลุด (Rollback)"]])}</fieldset>
   <fieldset><legend>เอกสาร MSA</legend>${r("doc",[["normal","ปกติ"],["blocked","ขาดไฟล์แนบ (บล็อก)"],["noai","AI สรุปไม่ได้"]])}</fieldset>
+  <fieldset><legend>ความเร็วโหลดเอกสาร</legend>${r("load",[["normal","ปกติ (~1 วินาที)"],["slow","ช้า (~3.5 วินาที)"]])}</fieldset>
   <fieldset><legend>ไฟล์ NDA</legend>${r("verify",[["valid","ลายเซ็นถูกต้อง"],["tamper","ถูกดัดแปลง"]])}</fieldset>
   <div class="kpi"><div>ปล่อยสไลด์ก่อนสุด<b>${KPI.slipRelease}</b></div><div>Face ID ไม่ผ่าน<b>${KPI.faceFail}</b></div></div>
   <div style="display:flex;gap:6px;margin-bottom:8px"><button class="btn ghost" style="height:32px;font-size:12px;flex:1" data-f="restart">เริ่มรอบใหม่</button><button class="btn ghost" style="height:32px;font-size:12px;flex:1" data-f="copy">คัดลอก Log</button></div>

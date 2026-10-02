@@ -12,7 +12,10 @@ Interactive prototype (HTML ไฟล์เดียว) สำหรับท�
 5. สั่ง deploy ซ้ำโดยไม่ต้อง push: Actions → Deploy to GitHub Pages → Run workflow
 
 ## อัปเดต prototype
-แก้ `public/index.html` โดยตรง (ไฟล์นี้คือต้นฉบับ) แล้ว commit + push ระบบจะ deploy ใหม่อัตโนมัติ
+แก้ไฟล์ใน `public/` โดยตรง แล้ว commit + push ระบบจะ deploy ใหม่อัตโนมัติ
+- `index.html` — โครง HTML
+- `styles.css` — สไตล์ทั้งหมด (รวม design tokens)
+- `app.js` — ข้อมูลและ logic ของ prototype
 
 ## Design tokens
 ขนาดตัวอักษรใช้ตัวแปร CSS: `--fs-xs` 12 · `--fs-sm` 14 · `--fs-md` 16 (เนื้อหา) · `--fs-lg` 18 · `--fs-xl` 20

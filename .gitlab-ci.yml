@@ -1,0 +1,10 @@
+# GitLab Pages: deploy the static usability-test prototype in /public
+pages:
+  stage: deploy
+  script:
+    - echo "Deploying public/ to GitLab Pages"
+  artifacts:
+    paths:
+      - public
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
